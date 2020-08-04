@@ -3,6 +3,7 @@
 
 #include "VRCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SceneComponent.h"
 
 // Sets default values
 AVRCharacter::AVRCharacter()
@@ -10,10 +11,14 @@ AVRCharacter::AVRCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// scene component
+	VRRoot = CreateDefaultSubobject<USceneComponent>(TEXT("VR Root"));
+	VRRoot->SetupAttachment(GetRootComponent());
+
 	// Camera component default subobject:
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	// Attaching the camera to root:
-	Camera->SetupAttachment(GetRootComponent());
+	Camera->SetupAttachment(VRRoot);
 
 
 }
@@ -29,6 +34,12 @@ void AVRCharacter::BeginPlay()
 void AVRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// find camera movement to correctly place the camera inside the colision object
+	FVector NewCameraOffset = Camera->GetComponentLocation() - GetActorLocation();
+	NewCameraOffset.Z = 0.0f; // to constrain just to x,y plane offset
+	AddActorWorldOffset(NewCameraOffset);
+	VRRoot->AddWorldOffset(-NewCameraOffset);
 
 }
 

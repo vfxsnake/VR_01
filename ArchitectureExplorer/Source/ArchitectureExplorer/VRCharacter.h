@@ -7,6 +7,7 @@
 #include "VRCharacter.generated.h"
 
 //forward Declaring:
+class USceneComponent;
 class UCameraComponent;
 
 UCLASS()
@@ -30,9 +31,14 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-
+	// camera pointer
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* Camera;
+	
+	// vr head set root offset:
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* VRRoot;
+
 
 	// private Funcitons:
 	void MoveForward(float Throttle);
