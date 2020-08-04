@@ -9,6 +9,8 @@
 //forward Declaring:
 class USceneComponent;
 class UCameraComponent;
+class UStaticMeshComponent;
+// struct FHitResult;
 
 UCLASS()
 class ARCHITECTUREEXPLORER_API AVRCharacter : public ACharacter
@@ -39,10 +41,18 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* VRRoot;
 
+	// destination head set root offset:
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* DestinationMarker;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxTeleportDistance =  1000.f;
 
 	// private Funcitons:
 	void MoveForward(float Throttle);
 	void MoveRight(float Throttle);
 
-
+	// private Fucntions
+	void TeleportTo(FHitResult& HitResult) const; 
+	
 };

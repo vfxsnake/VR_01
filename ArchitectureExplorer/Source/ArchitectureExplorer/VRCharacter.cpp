@@ -4,6 +4,9 @@
 #include "VRCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/EngineTypes.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AVRCharacter::AVRCharacter()
@@ -19,6 +22,10 @@ AVRCharacter::AVRCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	// Attaching the camera to root:
 	Camera->SetupAttachment(VRRoot);
+
+	// teleport destination marker:
+	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Destination Marker"));
+	DestinationMarker->SetupAttachment(GetRootComponent());
 
 
 }
@@ -40,6 +47,10 @@ void AVRCharacter::Tick(float DeltaTime)
 	NewCameraOffset.Z = 0.0f; // to constrain just to x,y plane offset
 	AddActorWorldOffset(NewCameraOffset);
 	VRRoot->AddWorldOffset(-NewCameraOffset);
+
+	// temporal FHitResult
+	FHitResult HitResult;
+	TeleportTo(HitResult);
 
 }
 
@@ -63,5 +74,28 @@ void AVRCharacter::MoveForward(float Throttle)
 void AVRCharacter::MoveRight(float Throttle) 
 {
 	AddMovementInput(Camera->GetRightVector(), Throttle);
+}
+
+void AVRCharacter::TeleportTo(FHitResult& HitResult) const
+{
+	FVector StartPos = Camera->GetComponentLocation();
+	FVector EndPos = StartPos + (Camera->GetForwardVector()* MaxTeleportDistance);
+	// DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, true);
+
+	bool HitFound = false; 
+	HitFound = GetWorld()->LineTraceSingleByChannel(HitResult, StartPos, EndPos, ECollisionChannel::ECC_Visibility);
+	if (HitFound)
+	{
+		// DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, true);	
+		FVector TeleportPosition = HitResult.Location;
+		DestinationMarker->SetVisibility(true);
+		DestinationMarker->SetWorldLocation(TeleportPosition);
+	}
+	else
+	{
+		DestinationMarker->SetVisibility(false);
+	}
+	
+
 }
 
