@@ -87,4 +87,8 @@ private:
 	void EndTeleport();
 
 	void AdjustBlinkRadius();
+
+	FVector2D GetBlinkerCentre();
+
+	bool bIsMovingForward(FVector VelDirection);
 };

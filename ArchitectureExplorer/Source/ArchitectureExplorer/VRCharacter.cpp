@@ -165,5 +165,50 @@ void AVRCharacter::AdjustBlinkRadius()
 	float Radius = RadiusRampVelocity->GetFloatValue(CurrentVelocity);
 
 	BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), Radius);
+	FVector2D Centre = GetBlinkerCentre();
+	BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Centre"), FLinearColor(Centre.X, Centre.Y, 0, 1));
+}
+
+FVector2D AVRCharacter::GetBlinkerCentre() 
+{
+	FVector MovementDirection = GetVelocity().GetSafeNormal();
+	
+	if (MovementDirection.IsNearlyZero())
+	{
+		return FVector2D(0.5,0.5);
+	}
+	
+	FVector WorldStationaryLocation = Camera->GetComponentLocation() + MovementDirection * 100;
+
+	// controller
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC)
+	{
+		FVector2D OutScreenPosition;
+		bool bIsProjected = PC->ProjectWorldLocationToScreen(WorldStationaryLocation, OutScreenPosition, true);
+		if (bIsProjected && bIsMovingForward(WorldStationaryLocation))
+		{
+			int32 OutSizeX;
+			int32 OutSizeY;
+			PC->GetViewportSize(OutSizeX, OutSizeY);
+
+			return FVector2D(OutScreenPosition.X / (float)OutSizeX , OutScreenPosition.Y / (float)OutSizeY) ;
+		}
+	}
+
+	return FVector2D(0.5,0.5);
+}
+
+bool AVRCharacter::bIsMovingForward(FVector VelDirection) 
+{
+	float DotProduct = FVector::DotProduct(Camera->GetForwardVector(), VelDirection);
+
+
+	if (DotProduct >= 0.0f)
+	{
+		return true;
+	}
+
+	return false;
 }
 
