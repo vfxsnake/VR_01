@@ -14,6 +14,11 @@ class UPostProcessComponent;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UCurveFloat;
+class USplineComponent;
+class UMotionControllerComponent;
+class UStaticMeshComponent;
+struct FPredictProjectilePathResult;
+
 
 // struct FHitResult;
 
@@ -54,6 +59,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	UPostProcessComponent* PostProcessComponent;
 
+	UPROPERTY(EditAnywhere)
+	USplineComponent* TeleportCurvePath;
+
 	// adding the interface of material to character:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* BlinkerMaterialBase;
@@ -66,7 +74,13 @@ private:
 	UCurveFloat* RadiusRampVelocity;
 	
 	UPROPERTY(EditDefaultsOnly)
-	float MaxTeleportDistance =  1000.f;
+	float TeleportProjectileSpeed =  1000;
+
+	UPROPERTY(EditDefaultsOnly)
+	float TeleportSimulationTime =  10;
+
+	UPROPERTY(EditDefaultsOnly)
+	float TeleportRadius =  10.f;
 
 	UPROPERTY(EditDefaultsOnly)
 	float TeleportCameraFade =  0.6f;
@@ -74,11 +88,20 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	FVector TeleportProjectionExtent =  FVector(100.f);
 
+	UPROPERTY(EditDefaultsOnly)
+	UMotionControllerComponent* LeftController;
+	
+	UPROPERTY(EditDefaultsOnly)
+	UMotionControllerComponent* RightController;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* DynamicMesh;
+
 	// private Funcitons:
 	void MoveForward(float Throttle);
 	void MoveRight(float Throttle);
 
-	void TeleportTo(FHitResult& HitResult) const; 
+	void TeleportTo(FHitResult& HitResult); 
 
 	void CameraFade(float InValue, float OutValue) const;
 
@@ -89,6 +112,8 @@ private:
 	void AdjustBlinkRadius();
 
 	FVector2D GetBlinkerCentre();
+
+	void UpdatePathCurve(FPredictProjectilePathResult Result);
 
 	bool bIsMovingForward(FVector VelDirection);
 };
